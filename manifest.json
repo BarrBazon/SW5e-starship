@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "manifest_version": 1,
   "author": "BarrBazon",
-  "description": "Спільний аркуш корабля SW5e.",
-  "icon": "icon.svg",
+  "description": "Shared SW5e starship sheet, synced for the whole table.",
+  "icon": "https://barrbazon.github.io/SW5e-starship/icon.svg",
   "action": {
     "title": "SW5e Starship",
-    "icon": "icon.svg",
-    "popover": "index.html",
+    "icon": "https://barrbazon.github.io/SW5e-starship/icon.svg",
+    "popover": "https://barrbazon.github.io/SW5e-starship/index.html",
     "height": 660,
     "width": 460
   }
