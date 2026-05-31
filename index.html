@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SW5e Starship Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Saira:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1018; --panel:#121b27; --panel2:#0e1622; --line:#22303f;
+    --text:#d8e4f2; --muted:#7e92a9; --amber:#ffb22e; --holo:#46d3ff;
+    --danger:#ff5f5f; --good:#5ad08a; --rad:8px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"Saira",system-ui,sans-serif; font-size:13px; line-height:1.4;
+    -webkit-font-smoothing:antialiased; padding:10px 10px 40px;
+  }
+  h1,h2,h3,.disp{font-family:"Chakra Petch",sans-serif; letter-spacing:.02em; font-weight:600}
+  .topbar{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
+  .topbar .logo{color:var(--amber)}
+  .topbar h1{font-size:15px;margin:0;flex:1;text-transform:uppercase;letter-spacing:.08em}
+  .status{font-size:11px;color:var(--muted);font-family:"Chakra Petch"}
+  .status.saving{color:var(--amber)} .status.synced{color:var(--good)}
+
+  section{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);margin-bottom:8px;overflow:hidden}
+  .sec-h{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;user-select:none;background:linear-gradient(0deg,transparent,rgba(70,211,255,.04))}
+  .sec-h h2{font-size:12px;margin:0;text-transform:uppercase;letter-spacing:.1em;color:var(--holo);flex:1}
+  .sec-h .chev{color:var(--muted);transition:transform .15s}
+  section.collapsed .sec-h .chev{transform:rotate(-90deg)}
+  section.collapsed .sec-b{display:none}
+  .sec-b{padding:10px;border-top:1px solid var(--line)}
+
+  .grid{display:grid;gap:8px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .field{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .field label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:"Chakra Petch"}
+  input,select,textarea{
+    width:100%;background:var(--panel2);color:var(--text);
+    border:1px solid var(--line);border-radius:6px;padding:6px 8px;
+    font-family:"Saira",sans-serif;font-size:13px;outline:none;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(255,178,46,.15)}
+  input[type=number]{appearance:textfield}
+  textarea{resize:vertical;min-height:60px;line-height:1.5}
+  .num{text-align:center}
+  .hint{font-size:10px;color:var(--muted);margin-top:2px;font-family:"Chakra Petch"}
+
+  .ability{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px;text-align:center}
+  .ability .ab-name{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:"Chakra Petch"}
+  .ability .ab-mod{font-family:"Chakra Petch";font-size:17px;color:var(--amber);line-height:1.1}
+  .ability input.ab-score{padding:3px;text-align:center;margin-top:3px}
+  .ability .ab-save{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--muted);margin-top:4px}
+
+  .skill-row{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .skill-row .sk-name{flex:1;font-size:12px}
+  .skill-row .sk-bonus{width:36px;text-align:center;color:var(--amber);font-family:"Chakra Petch"}
+  .pip{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--muted);cursor:pointer;flex:none;display:inline-block;position:relative}
+  .pip.on{background:var(--amber);border-color:var(--amber)}
+  .pip.exp.on{background:var(--holo);border-color:var(--holo)}
+  .pip-leg{font-size:9px;color:var(--muted);font-family:"Chakra Petch"}
+
+  table.list{width:100%;border-collapse:collapse;font-size:12px}
+  table.list th{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:2px 4px;font-family:"Chakra Petch";font-weight:500}
+  table.list td{padding:2px 4px;vertical-align:middle}
+  table.list input{padding:4px 6px}
+  .rm{background:none;border:none;color:var(--danger);cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
+  .rm:hover{transform:scale(1.15)}
+  .add-row{display:flex;gap:6px;margin-top:8px;align-items:flex-end;flex-wrap:wrap}
+  .add-row .field{flex:1}
+  button.add{background:rgba(70,211,255,.12);color:var(--holo);border:1px solid var(--holo);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:"Chakra Petch";font-size:12px;white-space:nowrap}
+  button.add:hover{background:rgba(70,211,255,.22)}
+  .price-tag{font-family:"Chakra Petch";color:var(--amber);font-size:11px;align-self:center;white-space:nowrap}
+
+  .meter{height:6px;background:var(--panel2);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:4px}
+  .meter > i{display:block;height:100%;background:var(--amber)}
+  .gm-only{position:relative}
+  .gm-badge{display:inline-block;font-size:9px;color:#0b1018;background:var(--amber);border-radius:3px;padding:1px 6px;font-family:"Chakra Petch";letter-spacing:.06em;margin-left:6px}
+  .note{font-size:11px;color:var(--muted);margin:0 0 8px}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="logo disp">◈</span>
+    <h1>Starship</h1>
+    <span class="status" id="status">…</span>
+  </div>
+
+  <!-- IDENTITY -->
+  <section id="sec-id">
+    <div class="sec-h"><h2>Корабель</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="grid g2">
+        <div class="field"><label>Назва</label><input data-bind="name"></div>
+        <div class="field"><label>Модель</label><input data-bind="model"></div>
+        <div class="field"><label>Виробник</label><input data-bind="manufacturer"></div>
+        <div class="field"><label>Роль / спеціалізація</label><input data-bind="role"></div>
+        <div class="field">
+          <label>Клас розміру (заміна корпусу)</label>
+          <select data-bind="size" id="sizeSel"></select>
+          <span class="hint" id="sizeHint"></span>
+        </div>
+        <div class="field"><label>Тір (0–5)</label><input class="num" type="number" data-bind="tier"></div>
+        <div class="field"><label>Вкладено кредитів</label><input class="num" type="number" data-bind="creditsInvested"></div>
+        <div class="field"><label>Кредитів до наст. тіру</label><input class="num" type="number" data-bind="creditsNext"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VITALS -->
+  <section id="sec-vit">
+    <div class="sec-h"><h2>Живучість</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="grid g4">
+        <div class="field"><label>HP поточні</label><input class="num" type="number" data-bind="hull.current"></div>
+        <div class="field"><label>HP максимум</label><input class="num" type="number" data-bind="hull.max"></div>
+        <div class="field"><label>Тимч. HP</label><input class="num" type="number" data-bind="hull.temp"></div>
+        <div class="field"><label>Hull Dice</label><input class="num" data-bind="hull.diceMax"></div>
+        <div class="field"><label>Щити поточні</label><input class="num" type="number" data-bind="shield.current"></div>
+        <div class="field"><label>Щити максимум</label><input class="num" type="number" data-bind="shield.max"></div>
+        <div class="field"><label>Тимч. щити</label><input class="num" type="number" data-bind="shield.temp"></div>
+        <div class="field"><label>Shield Dice</label><input class="num" data-bind="shield.diceMax"></div>
+      </div>
+      <div class="grid g4" style="margin-top:8px">
+        <div class="field"><label>Тип щита</label><input data-bind="shield.type"></div>
+        <div class="field"><label>КЗ (AC)</label><input class="num" type="number" data-bind="ac"></div>
+        <div class="field"><label>Броня: клас сили</label><input class="num" data-bind="armorStrClass"></div>
+        <div class="field"><label>Пасивний скан</label><input class="num" type="number" data-bind="passiveScan"></div>
+        <div class="field"><label>Швид. польоту</label><input class="num" data-bind="speedFly"></div>
+        <div class="field"><label>Швид. розвороту</label><input class="num" data-bind="speedTurn"></div>
+        <div class="field"><label>Клас гіпердвигуна</label><input class="num" data-bind="hyperdrive"></div>
+        <div class="field"><label>Бонус майстерності</label><input class="num" type="number" data-bind="profBonus"></div>
+      </div>
+      <div class="field" style="margin-top:8px"><label>Бонуси броні</label><input data-bind="armorBonuses"></div>
+    </div>
+  </section>
+
+  <!-- ABILITIES & SKILLS -->
+  <section id="sec-ab">
+    <div class="sec-h"><h2>Характеристики та навички</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="grid g3" id="abilityGrid"></div>
+      <div class="pip-leg" style="margin:10px 0 4px">● <span style="color:var(--amber)">Proficiently</span>&nbsp;&nbsp;● <span style="color:var(--holo)">Expertly equipped</span></div>
+      <div id="skillList"></div>
+    </div>
+  </section>
+
+  <!-- POWER & DAMAGE -->
+  <section id="sec-pow">
+    <div class="sec-h"><h2>Реактор та пошкодження</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="grid g2">
+        <div class="field"><label>Реактор</label><input data-bind="reactor"></div>
+        <div class="field"><label>Power coupling</label><input data-bind="powerCoupling"></div>
+        <div class="field"><label>Damage reduction</label><input class="num" type="number" data-bind="damageReduction"></div>
+        <div class="field"><label>Рятівні від руйнування: успіхи / провали</label>
+          <div style="display:flex;gap:6px"><input class="num" type="number" data-bind="destruction.successes" placeholder="✔"><input class="num" type="number" data-bind="destruction.failures" placeholder="✘"></div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px"><label>Системні пошкодження</label><textarea data-bind="systemDamage" placeholder="Поточні пошкодження систем…"></textarea></div>
+    </div>
+  </section>
+
+  <!-- WEAPONS -->
+  <section id="sec-wpn">
+    <div class="sec-h"><h2>Озброєння</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <table class="list"><thead><tr><th>Назва</th><th>Тип</th><th>Атака</th><th>Шкода/тип</th><th>Дальність</th><th>Дуга</th><th></th></tr></thead><tbody id="wpnBody"></tbody></table>
+      <div class="add-row">
+        <div class="field"><label>Тип</label><select id="wpnTypeSel"></select></div>
+        <div class="field"><label>Назва (приклад або своя)</label><input id="wpnNameInput" list="wpnExamples" placeholder="Laser Cannon…"><datalist id="wpnExamples"></datalist></div>
+        <button class="add" id="wpnAdd">+ Зброя</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODIFICATIONS -->
+  <section id="sec-mod">
+    <div class="sec-h"><h2>Модифікації</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="grid g3">
+        <div class="field"><label>Місткість мод. (used / total)</label>
+          <div style="display:flex;gap:6px"><input class="num" type="number" data-bind="modCapacityUsed"><input class="num" type="number" data-bind="modCapacityTotal"></div>
+          <div class="meter"><i id="capMeter"></i></div>
+          <span class="hint" id="capHint"></span>
+        </div>
+        <div class="field"><label>Fixed hardpoints (used / total)</label>
+          <div style="display:flex;gap:6px"><input class="num" type="number" data-bind="hardpointsFixedUsed"><input class="num" type="number" data-bind="hardpointsFixedTotal"></div>
+        </div>
+        <div class="field"><label>Turret hardpoints (used / total)</label>
+          <div style="display:flex;gap:6px"><input class="num" type="number" data-bind="hardpointsTurretUsed"><input class="num" type="number" data-bind="hardpointsTurretTotal"></div>
+        </div>
+        <div class="field"><label>Suites (used / max)</label>
+          <div style="display:flex;gap:6px"><input class="num" type="number" data-bind="suitesUsed"><input class="num" type="number" data-bind="suitesMax"></div>
+          <span class="hint" id="suiteHint"></span>
+        </div>
+      </div>
+      <table class="list" style="margin-top:10px"><thead><tr><th>Модифікація</th><th>Категорія</th><th>Ціна</th><th>Нотатка</th><th></th></tr></thead><tbody id="modBody"></tbody></table>
+      <div class="add-row">
+        <div class="field"><label>Категорія</label><select id="modCatSel"></select></div>
+        <div class="field"><label>Модифікація</label><select id="modNameSel"></select></div>
+        <div class="field"><label>Або власна назва</label><input id="modCustom" placeholder="(необов’язково)"></div>
+        <span class="price-tag" id="modPrice"></span>
+        <button class="add" id="modAdd">+ Додати</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARGO -->
+  <section id="sec-cargo">
+    <div class="sec-h"><h2>Вантаж та пальне</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="grid g4">
+        <div class="field"><label>Вантаж: used</label><input class="num" type="number" data-bind="cargoCapUsed"></div>
+        <div class="field"><label>Вантаж: total</label><input class="num" type="number" data-bind="cargoCapTotal"></div>
+        <div class="field"><label>Пальне: поточне</label><input class="num" type="number" data-bind="fuelCur"></div>
+        <div class="field"><label>Пальне: максимум</label><input class="num" type="number" data-bind="fuelCap"></div>
+      </div>
+      <table class="list" style="margin-top:10px"><thead><tr><th>Предмет</th><th>Вага</th><th></th></tr></thead><tbody id="cargoBody"></tbody></table>
+      <div class="add-row"><button class="add" id="cargoAdd">+ Предмет</button></div>
+    </div>
+  </section>
+
+  <!-- HIDDEN CARGO (GM ONLY) -->
+  <section id="sec-hidden" class="gm-only" style="display:none">
+    <div class="sec-h"><h2>Прихований вантаж <span class="gm-badge">GM</span></h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <p class="note">Видно лише майстру в інтерфейсі. Дані лежать у спільних метаданих кімнати — для справді секретного не покладайся лише на це приховування.</p>
+      <div class="grid g2">
+        <div class="field"><label>Прихований вантаж: used</label><input class="num" type="number" data-bind="hiddenCapUsed"></div>
+        <div class="field"><label>Прихований вантаж: total</label><input class="num" type="number" data-bind="hiddenCapTotal"></div>
+      </div>
+      <table class="list" style="margin-top:10px"><thead><tr><th>Предмет</th><th>Вага</th><th></th></tr></thead><tbody id="hiddenBody"></tbody></table>
+      <div class="add-row"><button class="add" id="hiddenAdd">+ Прихований предмет</button></div>
+    </div>
+  </section>
+
+  <!-- CREW -->
+  <section id="sec-crew">
+    <div class="sec-h"><h2>Екіпаж та пасажири</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="grid g3">
+        <div class="field"><label>Мін. ефект. екіпаж</label><input class="num" type="number" data-bind="crewMin"></div>
+        <div class="field"><label>Поточний екіпаж</label><input class="num" type="number" data-bind="crewCurrent"></div>
+        <div class="field"><label>Suite capacity</label><input class="num" type="number" data-bind="suiteCapacity"></div>
+      </div>
+      <table class="list" style="margin-top:10px"><thead><tr><th>Ім’я</th><th>Роль / станція</th><th></th></tr></thead><tbody id="crewBody"></tbody></table>
+      <div class="add-row"><button class="add" id="crewAdd">+ Член екіпажу</button></div>
+    </div>
+  </section>
+
+  <!-- FEATURES & NOTES -->
+  <section id="sec-notes">
+    <div class="sec-h"><h2>Особливості та нотатки</h2><span class="chev">▾</span></div>
+    <div class="sec-b">
+      <div class="field"><label>Ship features (швидка довідка в бою)</label><textarea data-bind="features"></textarea></div>
+      <div class="field" style="margin-top:8px"><label>Нотатки екіпажу</label><textarea data-bind="notes"></textarea></div>
+    </div>
+  </section>
+
+<script type="module">
+import { CHASSIS, MOD_CATEGORIES, MODIFICATIONS, WEAPON_TYPES } from "./catalog.js";
+let OBR = null;
+try { OBR = (await import("https://esm.sh/@owlbear-rodeo/sdk@3.1.0")).default; } catch(e){ console.warn("OBR SDK не завантажився — автономний режим", e); }
+
+const KEY = "com.barbazon.sw5e-starship/sheet";
+const ABILITIES = [["str","Strength"],["dex","Dexterity"],["con","Constitution"],["int","Intelligence"],["wis","Wisdom"],["cha","Charisma"]];
+const SKILLS = [["boost","Boost","dex"],["hide","Hide","dex"],["scan","Scan","wis"],["astrogation","Astrogation","int"],["ram","Ram","str"],["maneuvering","Maneuvering","dex"],["patch","Patch","con"],["regulation","Regulation","con"],["data","Data","int"],["probe","Probe","wis"],["interfere","Interfere","cha"],["menace","Menace","cha"],["swindle","Swindle","cha"]];
+
+function defaultState(){
+  const ab={}, sk={};
+  ABILITIES.forEach(([k])=>ab[k]={score:10,save:false});
+  SKILLS.forEach(([k])=>sk[k]={prof:false,exp:false});
+  return {
+    name:"",model:"",manufacturer:"",size:"medium",tier:0,role:"",creditsInvested:0,creditsNext:0,profBonus:2,
+    hull:{current:0,max:0,temp:0,diceMax:"5d8"}, shield:{current:0,max:0,temp:0,diceMax:"5d8",type:""},
+    ac:0,armorStrClass:"",armorBonuses:"",passiveScan:10,speedFly:"",speedTurn:"",hyperdrive:"",
+    abilities:ab, skills:sk,
+    reactor:"",powerCoupling:"",damageReduction:0,destruction:{successes:0,failures:0},systemDamage:"",
+    weapons:[],
+    modCapacityUsed:0,modCapacityTotal:30,hardpointsFixedUsed:0,hardpointsFixedTotal:1,hardpointsTurretUsed:0,hardpointsTurretTotal:0,suitesUsed:0,suitesMax:3,
+    modifications:[],
+    cargoCapUsed:0,cargoCapTotal:0,fuelCur:0,fuelCap:0,cargo:[],
+    hiddenCapUsed:0,hiddenCapTotal:0,hiddenCargo:[],
+    crewMin:1,crewCurrent:1,suiteCapacity:0,crew:[],
+    features:"",notes:""
+  };
+}
+let state = defaultState();
+let isGM = false, lastSerialized = "", saveTimer = null;
+let ready = false, pendingSave = false, hadRemote = false;
+
+// ---------- helpers
+const $ = s => document.querySelector(s);
+function getPath(o,p){ return p.split(".").reduce((a,k)=>a?.[k],o); }
+function setPath(o,p,v){ const ks=p.split("."); let c=o; for(let i=0;i<ks.length-1;i++){ c[ks[i]]=c[ks[i]]??{}; c=c[ks[i]]; } c[ks.at(-1)]=v; }
+function abilityMod(score){ return Math.floor((Number(score)-10)/2); }
+function fmtMod(n){ return (n>=0?"+":"")+n; }
+function setStatus(t,cls){ const el=$("#status"); el.textContent=t; el.className="status"+(cls?" "+cls:""); }
+
+// ---------- save / sync
+function scheduleSave(){
+  if(!OBR || !OBR.isAvailable){ setStatus("автономно (без синхр.)"); return; }
+  if(!ready){ pendingSave = true; setStatus("підключення…"); return; }
+  if(saveTimer) clearTimeout(saveTimer);
+  setStatus("збереження…","saving");
+  saveTimer = setTimeout(async ()=>{
+    lastSerialized = JSON.stringify(state);
+    try{ await OBR.room.setMetadata({[KEY]: state}); setStatus("синхронізовано","synced"); }
+    catch(e){ console.error("setMetadata failed", e); setStatus("помилка збереження"); }
+  },400);
+}
+function applyRemote(incoming){
+  const s = JSON.stringify(incoming);
+  if(s === lastSerialized) return;
+  state = Object.assign(defaultState(), incoming);
+  lastSerialized = s;
+  refreshStatic(true);
+  if(!document.activeElement || !document.activeElement.closest(".list, .add-row")){
+    renderAll();
+  }
+  recompute();
+  setStatus("синхронізовано","synced");
+}
+
+// ---------- static binding
+function refreshStatic(skipFocused){
+  document.querySelectorAll("[data-bind]").forEach(el=>{
+    if(skipFocused && el===document.activeElement) return;
+    const v = getPath(state, el.dataset.bind);
+    if(el.type==="checkbox") el.checked=!!v; else el.value = (v??"");
+  });
+}
+function bindStatic(){
+  document.querySelectorAll("[data-bind]").forEach(el=>{
+    const ev = (el.tagName==="SELECT") ? "change" : "input";
+    el.addEventListener(ev, ()=>{
+      let v = el.type==="checkbox" ? el.checked : el.value;
+      if(el.type==="number") v = v===""? "" : Number(v);
+      setPath(state, el.dataset.bind, v);
+      if(el.id==="sizeSel") onSizeChange();
+      recompute(); scheduleSave();
+    });
+  });
+}
+
+// ---------- abilities & skills
+function buildAbilities(){
+  const g=$("#abilityGrid"); g.innerHTML="";
+  ABILITIES.forEach(([k,label])=>{
+    const d=document.createElement("div"); d.className="ability";
+    d.innerHTML=`<div class="ab-name">${label}</div>
+      <div class="ab-mod" id="mod-${k}">+0</div>
+      <input class="ab-score num" type="number" id="score-${k}">
+      <div class="ab-save"><span class="pip" id="save-${k}"></span>save</div>`;
+    g.appendChild(d);
+    d.querySelector(`#score-${k}`).addEventListener("input",e=>{ state.abilities[k].score=Number(e.target.value)||0; recompute(); scheduleSave(); });
+    d.querySelector(`#save-${k}`).addEventListener("click",()=>{ state.abilities[k].save=!state.abilities[k].save; recompute(); scheduleSave(); });
+  });
+}
+function buildSkills(){
+  const c=$("#skillList"); c.innerHTML="";
+  SKILLS.forEach(([k,label,ab])=>{
+    const r=document.createElement("div"); r.className="skill-row";
+    r.innerHTML=`<span class="pip" id="sp-${k}" title="Proficient"></span>
+      <span class="pip exp" id="se-${k}" title="Expertly equipped"></span>
+      <span class="sk-name">${label} <span style="color:var(--muted);font-size:10px">(${ab.toUpperCase()})</span></span>
+      <span class="sk-bonus" id="sb-${k}">+0</span>`;
+    c.appendChild(r);
+    r.querySelector(`#sp-${k}`).addEventListener("click",()=>{ state.skills[k].prof=!state.skills[k].prof; recompute(); scheduleSave(); });
+    r.querySelector(`#se-${k}`).addEventListener("click",()=>{ state.skills[k].exp=!state.skills[k].exp; recompute(); scheduleSave(); });
+  });
+}
+
+// ---------- recompute derived display
+function recompute(){
+  ABILITIES.forEach(([k])=>{
+    const m=abilityMod(state.abilities[k].score);
+    const me=$("#mod-"+k); if(me) me.textContent=fmtMod(m);
+    const sc=$("#score-"+k); if(sc && sc!==document.activeElement) sc.value=state.abilities[k].score;
+    const sv=$("#save-"+k); if(sv) sv.classList.toggle("on", !!state.abilities[k].save);
+  });
+  const pb=Number(state.profBonus)||0;
+  SKILLS.forEach(([k,,ab])=>{
+    const m=abilityMod(state.abilities[ab].score);
+    let bonus=m + (state.skills[k].prof?pb:0) + (state.skills[k].exp?pb:0);
+    const b=$("#sb-"+k); if(b) b.textContent=fmtMod(bonus);
+    const sp=$("#sp-"+k); if(sp) sp.classList.toggle("on",!!state.skills[k].prof);
+    const se=$("#se-"+k); if(se) se.classList.toggle("on",!!state.skills[k].exp);
+  });
+  // capacity meter
+  const used=Number(state.modCapacityUsed)||0, tot=Number(state.modCapacityTotal)||0;
+  const pct = tot>0? Math.min(100, Math.round(used/tot*100)) : 0;
+  const cm=$("#capMeter"); if(cm){ cm.style.width=pct+"%"; cm.style.background = used>tot? "var(--danger)":"var(--amber)"; }
+  const ch=CHASSIS[state.size];
+  $("#capHint").textContent = ch? `базова місткість корпусу: ${ch.baseModCapacity}` : "";
+  $("#suiteHint").textContent = ch? `макс. suites: ${ch.maxSuites}` : "";
+}
+
+// ---------- chassis swap
+function onSizeChange(){
+  const ch=CHASSIS[state.size]; if(!ch) return;
+  $("#sizeHint").textContent = `Hull ${ch.hullDice} · Shield ${ch.shieldDice} · база місткості ${ch.baseModCapacity} · ×${ch.costMod} вартість`;
+}
+
+// ---------- dynamic lists
+function tdInput(val,oninput,attrs=""){ return `<input value="${(val??"").toString().replace(/"/g,'&quot;')}" ${attrs}>`; }
+function renderWeapons(){
+  const b=$("#wpnBody"); b.innerHTML="";
+  state.weapons.forEach((w,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><input value="${esc(w.name)}" data-i="${i}" data-f="name"></td>
+      <td><input value="${esc(w.type)}" data-i="${i}" data-f="type" style="width:70px"></td>
+      <td><input value="${esc(w.attack)}" data-i="${i}" data-f="attack" style="width:48px"></td>
+      <td><input value="${esc(w.damage)}" data-i="${i}" data-f="damage"></td>
+      <td><input value="${esc(w.range)}" data-i="${i}" data-f="range" style="width:64px"></td>
+      <td><input value="${esc(w.arc)}" data-i="${i}" data-f="arc" style="width:56px"></td>
+      <td><button class="rm" data-rm-wpn="${i}">×</button></td>`;
+    b.appendChild(tr);
+  });
+  b.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{ state.weapons[+e.target.dataset.i][e.target.dataset.f]=e.target.value; scheduleSave(); }));
+  b.querySelectorAll("[data-rm-wpn]").forEach(btn=>btn.addEventListener("click",e=>{ state.weapons.splice(+e.target.dataset.rmWpn,1); renderWeapons(); scheduleSave(); }));
+}
+function renderMods(){
+  const b=$("#modBody"); b.innerHTML="";
+  state.modifications.forEach((m,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${esc(m.name)}</td>
+      <td style="color:var(--muted)">${esc((MOD_CATEGORIES[m.cat]||{}).label||m.cat)}</td>
+      <td style="color:var(--amber);font-family:'Chakra Petch'">${m.price?Number(m.price).toLocaleString():"—"}</td>
+      <td><input value="${esc(m.note)}" data-i="${i}" data-f="note" placeholder="…"></td>
+      <td><button class="rm" data-rm-mod="${i}">×</button></td>`;
+    b.appendChild(tr);
+  });
+  b.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{ state.modifications[+e.target.dataset.i].note=e.target.value; scheduleSave(); }));
+  b.querySelectorAll("[data-rm-mod]").forEach(btn=>btn.addEventListener("click",e=>{ state.modifications.splice(+e.target.dataset.rmMod,1); renderMods(); scheduleSave(); }));
+}
+function renderCargo(hidden){
+  const b=$(hidden?"#hiddenBody":"#cargoBody"); const arr=hidden?state.hiddenCargo:state.cargo; b.innerHTML="";
+  arr.forEach((c,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><input value="${esc(c.item)}" data-i="${i}" data-f="item"></td>
+      <td><input value="${esc(c.weight)}" data-i="${i}" data-f="weight" style="width:70px"></td>
+      <td><button class="rm" data-rm="${i}">×</button></td>`;
+    b.appendChild(tr);
+  });
+  b.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{ arr[+e.target.dataset.i][e.target.dataset.f]=e.target.value; scheduleSave(); }));
+  b.querySelectorAll("[data-rm]").forEach(btn=>btn.addEventListener("click",e=>{ arr.splice(+e.target.dataset.rm,1); renderCargo(hidden); scheduleSave(); }));
+}
+function renderCrew(){
+  const b=$("#crewBody"); b.innerHTML="";
+  state.crew.forEach((c,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><input value="${esc(c.name)}" data-i="${i}" data-f="name"></td>
+      <td><input value="${esc(c.role)}" data-i="${i}" data-f="role"></td>
+      <td><button class="rm" data-rm="${i}">×</button></td>`;
+    b.appendChild(tr);
+  });
+  b.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{ state.crew[+e.target.dataset.i][e.target.dataset.f]=e.target.value; scheduleSave(); }));
+  b.querySelectorAll("[data-rm]").forEach(btn=>btn.addEventListener("click",e=>{ state.crew.splice(+e.target.dataset.rm,1); renderCrew(); scheduleSave(); }));
+}
+function esc(v){ return (v??"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function renderAll(){ renderWeapons(); renderMods(); renderCargo(false); renderCargo(true); renderCrew(); }
+
+// ---------- pickers
+function fillSelect(sel,obj,labelFn){ sel.innerHTML=""; for(const k in obj){ const o=document.createElement("option"); o.value=k; o.textContent=labelFn(k,obj[k]); sel.appendChild(o); } }
+function buildPickers(){
+  // size
+  fillSelect($("#sizeSel"),CHASSIS,(k,v)=>v.label);
+  // weapon types
+  fillSelect($("#wpnTypeSel"),WEAPON_TYPES,(k,v)=>v.label);
+  refreshWpnExamples();
+  $("#wpnTypeSel").addEventListener("change",refreshWpnExamples);
+  // mod category + names
+  fillSelect($("#modCatSel"),MOD_CATEGORIES,(k,v)=>v.label);
+  refreshModNames(); updateModPrice();
+  $("#modCatSel").addEventListener("change",()=>{ refreshModNames(); updateModPrice(); });
+  $("#modNameSel").addEventListener("change",updateModPrice);
+  $("#modCustom").addEventListener("input",updateModPrice);
+}
+function refreshWpnExamples(){
+  const dl=$("#wpnExamples"); dl.innerHTML="";
+  (WEAPON_TYPES[$("#wpnTypeSel").value]?.examples||[]).forEach(x=>{ const o=document.createElement("option"); o.value=x; dl.appendChild(o); });
+}
+function refreshModNames(){
+  const cat=$("#modCatSel").value; const sel=$("#modNameSel"); sel.innerHTML="";
+  (MODIFICATIONS[cat]||[]).forEach(n=>{ const o=document.createElement("option"); o.value=n; o.textContent=n; sel.appendChild(o); });
+}
+function calcModPrice(cat){ const base=(MOD_CATEGORIES[cat]||{}).baseCost||0; const mod=(CHASSIS[state.size]||{}).costMod||1; return Math.round(base*mod); }
+function updateModPrice(){ $("#modPrice").textContent = calcModPrice($("#modCatSel").value).toLocaleString()+" cr"; }
+
+// ---------- add buttons
+function wire(){
+  $("#wpnAdd").addEventListener("click",()=>{ state.weapons.push({name:$("#wpnNameInput").value||"Нова зброя",type:($("#wpnTypeSel").value||"").slice(0,4),attack:"",damage:"",range:"",arc:""}); $("#wpnNameInput").value=""; renderWeapons(); scheduleSave(); });
+  $("#modAdd").addEventListener("click",()=>{ const cat=$("#modCatSel").value; const name=$("#modCustom").value.trim()||$("#modNameSel").value; if(!name) return; state.modifications.push({cat,name,price:calcModPrice(cat),note:""}); $("#modCustom").value=""; renderMods(); scheduleSave(); });
+  $("#cargoAdd").addEventListener("click",()=>{ state.cargo.push({item:"",weight:""}); renderCargo(false); scheduleSave(); });
+  $("#hiddenAdd").addEventListener("click",()=>{ state.hiddenCargo.push({item:"",weight:""}); renderCargo(true); scheduleSave(); });
+  $("#crewAdd").addEventListener("click",()=>{ state.crew.push({name:"",role:""}); renderCrew(); scheduleSave(); });
+  document.querySelectorAll(".sec-h").forEach(h=>h.addEventListener("click",()=>h.parentElement.classList.toggle("collapsed")));
+}
+
+// ---------- boot
+async function init(){
+  bindStatic(); buildAbilities(); buildSkills(); buildPickers(); wire();
+  if(OBR && OBR.isAvailable){
+    setStatus("підключення…");
+    let started = false;
+    async function startWhenReady(){
+      if(started) return; started = true; ready = true;
+      try{
+        try{ isGM = (await OBR.player.getRole())==="GM"; }catch(_){ isGM=false; }
+        $("#sec-hidden").style.display = isGM? "block":"none";
+        try{ OBR.player.onChange(p=>{ isGM=(p&&p.role)==="GM"; $("#sec-hidden").style.display=isGM?"block":"none"; }); }catch(_){}
+        const md = await OBR.room.getMetadata();
+        if(md && md[KEY]){ state=Object.assign(defaultState(),md[KEY]); lastSerialized=JSON.stringify(state); hadRemote=true; }
+        OBR.room.onMetadataChange(m=>{ if(m[KEY]) applyRemote(m[KEY]); });
+        refreshStatic(true); renderAll(); onSizeChange(); recompute();
+        setStatus("синхронізовано","synced");
+        if(pendingSave || !hadRemote){ pendingSave=false; scheduleSave(); }
+      }catch(e){ console.error("OBR ready error", e); setStatus("помилка OBR"); }
+    }
+    try{ OBR.onReady(()=>startWhenReady()); }catch(_){}
+    // Запасний шлях: у важких кімнатах onReady інколи запізнюється — опитуємо OBR.isReady до ~20с.
+    let tries = 0;
+    const poll = setInterval(()=>{
+      if(started){ clearInterval(poll); return; }
+      tries++;
+      if(OBR.isReady === true){ clearInterval(poll); startWhenReady(); }
+      else if(tries >= 40){ clearInterval(poll); if(!started) setStatus("підключення затягується — онови (Ctrl+F5)"); }
+    }, 500);
+  } else {
+    $("#sec-hidden").style.display="block"; // автономний прев’ю — показати все
+    setStatus("автономний режим");
+    refreshStatic(); renderAll(); onSizeChange(); recompute();
+  }
+}
+init();
+</script>
+</body>
+</html>
