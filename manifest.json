@@ -1,0 +1,14 @@
+{
+  "name": "SW5e Starship Sheet",
+  "version": "1.0.0",
+  "author": "BarrBazon",
+  "description": "Спільний інтерактивний аркуш корабля для SW5e — синхронізується між усіма за столом. Заміна класу корпусу, каталог модифікацій з авто-ціною, прихований вантаж лише для майстра.",
+  "icon": "icon.svg",
+  "action": {
+    "title": "SW5e Starship",
+    "icon": "icon.svg",
+    "popover": "index.html",
+    "height": 660,
+    "width": 460
+  }
+}
