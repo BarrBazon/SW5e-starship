@@ -315,7 +315,7 @@ function scheduleSave(){
     lastSerialized = JSON.stringify(state);
     try{
       if(isGM){ await OBR.room.setMetadata({[KEY]: state}); setStatus("синхронізовано","synced"); }
-      else { await OBR.broadcast.sendMessage(EDIT_CH, state); setStatus("надіслано майстру…"); }
+      else { await OBR.broadcast.sendMessage(EDIT_CH, state, { destination: "ALL" }); setStatus("надіслано майстру…"); }
     }
     catch(e){ console.error("save failed", e); setStatus(isGM? "помилка збереження" : "майстер офлайн?"); }
   },400);
@@ -525,7 +525,7 @@ async function init(){
         if(md && md[KEY]){ state=Object.assign(defaultState(),md[KEY]); lastSerialized=JSON.stringify(state); hadRemote=true; }
         OBR.room.onMetadataChange(m=>{ if(m[KEY]) applyRemote(m[KEY]); });
         if(isGM){
-          try{ OBR.broadcast.onMessage(EDIT_CH, ev=>{ if(ev && ev.data){ OBR.room.setMetadata({[KEY]: ev.data}).catch(e=>console.error("relay write failed", e)); } }); }catch(e){ console.error("broadcast subscribe failed", e); }
+          try{ OBR.broadcast.onMessage(EDIT_CH, ev=>{ const d = ev && (ev.data!==undefined ? ev.data : ev); if(d){ OBR.room.setMetadata({[KEY]: d}).catch(e=>console.error("relay write failed", e)); } }); }catch(e){ console.error("broadcast subscribe failed", e); }
         }
         refreshStatic(true); renderAll(); onSizeChange(); recompute();
         setStatus("синхронізовано","synced");
