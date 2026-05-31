@@ -267,9 +267,10 @@
 <script type="module">
 import { CHASSIS, MOD_CATEGORIES, MODIFICATIONS, WEAPON_TYPES } from "./catalog.js";
 let OBR = null;
-try { OBR = (await import("https://esm.sh/@owlbear-rodeo/sdk@3.1.0")).default; } catch(e){ console.warn("OBR SDK не завантажився — автономний режим", e); }
+try { OBR = (await import("./sdk.js")).default; } catch(e){ console.warn("OBR SDK не завантажився — автономний режим", e); }
 
 const KEY = "com.barbazon.sw5e-starship/sheet";
+const EDIT_CH = "com.barbazon.sw5e-starship/edit";
 const ABILITIES = [["str","Strength"],["dex","Dexterity"],["con","Constitution"],["int","Intelligence"],["wis","Wisdom"],["cha","Charisma"]];
 const SKILLS = [["boost","Boost","dex"],["hide","Hide","dex"],["scan","Scan","wis"],["astrogation","Astrogation","int"],["ram","Ram","str"],["maneuvering","Maneuvering","dex"],["patch","Patch","con"],["regulation","Regulation","con"],["data","Data","int"],["probe","Probe","wis"],["interfere","Interfere","cha"],["menace","Menace","cha"],["swindle","Swindle","cha"]];
 
@@ -312,8 +313,11 @@ function scheduleSave(){
   setStatus("збереження…","saving");
   saveTimer = setTimeout(async ()=>{
     lastSerialized = JSON.stringify(state);
-    try{ await OBR.room.setMetadata({[KEY]: state}); setStatus("синхронізовано","synced"); }
-    catch(e){ console.error("setMetadata failed", e); setStatus("помилка збереження"); }
+    try{
+      if(isGM){ await OBR.room.setMetadata({[KEY]: state}); setStatus("синхронізовано","synced"); }
+      else { await OBR.broadcast.sendMessage(EDIT_CH, state); setStatus("надіслано майстру…"); }
+    }
+    catch(e){ console.error("save failed", e); setStatus(isGM? "помилка збереження" : "майстер офлайн?"); }
   },400);
 }
 function applyRemote(incoming){
@@ -520,9 +524,12 @@ async function init(){
         const md = await OBR.room.getMetadata();
         if(md && md[KEY]){ state=Object.assign(defaultState(),md[KEY]); lastSerialized=JSON.stringify(state); hadRemote=true; }
         OBR.room.onMetadataChange(m=>{ if(m[KEY]) applyRemote(m[KEY]); });
+        if(isGM){
+          try{ OBR.broadcast.onMessage(EDIT_CH, ev=>{ if(ev && ev.data){ OBR.room.setMetadata({[KEY]: ev.data}).catch(e=>console.error("relay write failed", e)); } }); }catch(e){ console.error("broadcast subscribe failed", e); }
+        }
         refreshStatic(true); renderAll(); onSizeChange(); recompute();
         setStatus("синхронізовано","synced");
-        if(pendingSave || !hadRemote){ pendingSave=false; scheduleSave(); }
+        if(pendingSave || (!hadRemote && isGM)){ pendingSave=false; scheduleSave(); }
       }catch(e){ console.error("OBR ready error", e); setStatus("помилка OBR"); }
     }
     try{ OBR.onReady(()=>startWhenReady()); }catch(_){}
